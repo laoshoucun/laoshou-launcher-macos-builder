@@ -35,7 +35,6 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            ${{ runner.temp }}/source/src-tauri/target
           key: macos-rust-v1-${{ hashFiles('source.tar.gz.enc') }}
           restore-keys: macos-rust-v1-
       - name: Dependencies
