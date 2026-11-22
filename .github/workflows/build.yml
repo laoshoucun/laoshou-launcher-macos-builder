@@ -1,0 +1,47 @@
+name: macOS
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: macos
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prepare
+        env:
+          SOURCE_ARCHIVE_PASSWORD: ${{ secrets.SOURCE_ARCHIVE_PASSWORD }}
+        run: |
+          node decrypt-source.mjs source.tar.gz.enc "$RUNNER_TEMP/source.tar.gz"
+          mkdir "$RUNNER_TEMP/source"
+          tar -xzf "$RUNNER_TEMP/source.tar.gz" -C "$RUNNER_TEMP/source"
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '10.12.3'
+      - name: Dependencies
+        working-directory: ${{ runner.temp }}/source
+        run: pnpm install --frozen-lockfile
+      - name: Build and verify
+        working-directory: ${{ runner.temp }}/source
+        run: bash scripts/build-macos-release.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: laoshou-launcher-macos-universal
+          path: ${{ runner.temp }}/source/release-assets/*
+          if-no-files-found: error
+          retention-days: 14
+      - name: Clean
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/source" "$RUNNER_TEMP/source.tar.gz"
