@@ -30,6 +30,14 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: '10.12.3'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ${{ runner.temp }}/source/src-tauri/target
+          key: macos-rust-v1-${{ hashFiles('source.tar.gz.enc') }}
+          restore-keys: macos-rust-v1-
       - name: Dependencies
         working-directory: ${{ runner.temp }}/source
         run: pnpm install --frozen-lockfile
