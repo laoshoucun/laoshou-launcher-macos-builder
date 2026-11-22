@@ -1,2 +1,3 @@
-# laoshou-launcher-macos-builder
-Encrypted macOS build
+# 老手启动器 macOS
+
+加密构建仓库。仅保存加密构建输入与自动化文件。
